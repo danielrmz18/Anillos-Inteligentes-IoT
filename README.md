@@ -24,18 +24,8 @@ Sistema web modular para la **administración, control y monitoreo de anillos in
 
 ---
 
-## 🚀 Descripción del Proyecto
 
-Esta aplicación permite gestionar dispositivos tipo anillo inteligente desde una sola plataforma web.  
-El sistema integra tres módulos principales:
 
-- 📋 **CRUD** – Administración completa de dispositivos.
-- 🎛 **Control** – Manipulación del estado y parámetros del anillo.
-- 📊 **Monitoreo** – Visualización gráfica en tiempo real con refresco automático cada 2 segundos.
-
-Todo el sistema funciona sobre una API REST alojada en MockAPI.
-
----
 
 ## 🌐 API Utilizada
 https://698a177cc04d974bc6a1538d.mockapi.io/api/v1/Examen
