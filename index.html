@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Anillos Inteligentes IoT · Suite</title>
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Chart.js (solo lo usa Monitor, pero es ok cargarlo una vez) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="./assets/css/main.css"/>
+</head>
+<body>
+
+  <!-- Navbar (una sola) -->
+  <nav class="navbar navbar-dark topbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#crud">
+        <span class="brand-dot"></span>
+        <span class="fw-semibold">Anillos Inteligentes IoT</span>
+        <span class="badge text-bg-light ms-2">Suite</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <div class="btn-group" role="group" aria-label="Navegación">
+          <a class="btn btn-outline-light btn-sm" href="#crud" data-nav="crud">
+            <i class="bi bi-database"></i> CRUD
+          </a>
+          <a class="btn btn-outline-light btn-sm" href="#control" data-nav="control">
+            <i class="bi bi-toggles"></i> Control
+          </a>
+          <a class="btn btn-light btn-sm" href="#monitor" data-nav="monitor">
+            <i class="bi bi-graph-up"></i> Monitoreo
+          </a>
+        </div>
+
+        <div class="vr d-none d-md-block mx-1"></div>
+
+        <!-- acciones globales opcionales -->
+        <button id="btnGlobalReload" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-arrow-clockwise"></i> Recargar datos
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+
+    <!-- Header global -->
+    <section class="card panel border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="row g-3 align-items-center">
+          <div class="col-lg-7">
+            <h1 class="h4 fw-semibold mb-1">Panel principal</h1>
+            <p class="text-secondary mb-0">
+              Navega entre <b>CRUD</b>, <b>Control</b> y <b>Monitoreo</b>. Todo en una sola app, modular y limpia.
+            </p>
+          </div>
+          <div class="col-lg-5">
+            <div class="stats">
+              <div class="stat">
+                <div class="label">Registros</div>
+                <div id="statTotal" class="value">—</div>
+              </div>
+              <div class="stat">
+                <div class="label">Última carga</div>
+                <div id="statLastLoad" class="value">—</div>
+              </div>
+              <div class="stat">
+                <div class="label">Estado</div>
+                <div id="statStatus" class="value">
+                  <span class="badge rounded-pill text-bg-secondary">Esperando</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <div class="col-md-8">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent"><i class="bi bi-search"></i></span>
+              <input id="globalSearch" type="search" class="form-control" placeholder="Búsqueda global por nombre, modelo, IP...">
+              <button id="btnGlobalClear" class="btn btn-outline-secondary" type="button">Limpiar</button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <select id="globalFilterEstado" class="form-select">
+              <option value="">Todos los estados</option>
+              <option value="true">Activos</option>
+              <option value="false">Inactivos</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTAS (SPA) -->
+    <section id="view-crud" class="view">
+      <!-- se renderiza por JS -->
+    </section>
+
+    <section id="view-control" class="view d-none">
+      <!-- se renderiza por JS -->
+    </section>
+
+    <section id="view-monitor" class="view d-none">
+      <!-- se renderiza por JS -->
+    </section>
+
+  </main>
+
+  <!-- Toast global -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="appToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div id="toastMsg" class="toast-body">Listo.</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal global (CRUD usa este) -->
+  <div class="modal fade" id="ringModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-elegant border-0 shadow">
+        <div class="modal-header border-0">
+          <h5 id="modalTitle" class="modal-title fw-semibold">Nuevo anillo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <form id="ringForm" class="modal-body pt-0">
+          <input type="hidden" id="ringId">
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre</label>
+              <input id="Nombre" class="form-control" required maxlength="60" placeholder="Ej. Ring Alpha">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Modelo</label>
+              <input id="Modelo" class="form-control" required maxlength="60" placeholder="Ej. SR-200">
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Usuario (avatar URL)</label>
+              <input id="Usuario" class="form-control" placeholder="https://.../avatar.png">
+              <div class="form-text">Opcional. Si está vacío se genera uno automáticamente.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Estado</label>
+              <select id="Estado" class="form-select" required>
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Batería (%)</label>
+              <input id="Bateria" type="number" class="form-control" min="0" max="100" step="1" required placeholder="0 - 100">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Última sincronización</label>
+              <input id="UltimaSincronizacion" class="form-control" placeholder="ISO o texto">
+              <div class="form-text">Si lo dejas vacío, se asigna fecha actual.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">IP</label>
+              <input id="Ip" class="form-control" placeholder="Ej. 192.168.1.10">
+              <div class="form-text">Opcional.</div>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 px-0 pb-0 mt-4">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-dark">
+              <i class="bi bi-save2"></i> Guardar
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
